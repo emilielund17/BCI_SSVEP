@@ -2,6 +2,7 @@ import scipy.io as sio
 from scipy.signal import decimate, butter, filtfilt
 import numpy as np
 import matplotlib.pyplot as plt #for plotting, optional
+import sklearn
 from sklearn.cross_decomposition import CCA
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
@@ -9,10 +10,10 @@ from sklearn.metrics import accuracy_score
 
 # Path to your .mat file
 #mat_file_path = '/Users/HannahWolfe_1/Desktop/SSVEP-BCI-Data/BCI_SSVEP/data/S1.mat' # hannah
-mat_file_path = '/Users/emilielund/Documents/MSc Medicin og Teknologi/2. semester/22053 Principles of Brain Computer Interface /Project/BCI_SSVEP/data/S1.mat' # emilie
+mat_file_path = '/Users/emilielund/Documents/MSc Medicin og Teknologi/2. semester/22053 Principles of Brain Computer Interface /Project/BCI_SSVEP/data' # emilie
 
 # Load the .mat file
-mat_contents = sio.loadmat(mat_file_path)
+mat_contents = sio.loadmat(f'{mat_file_path}/S1.mat')
 
 # Access the data (assuming it's named 'data' inside the .mat file)
 data = mat_contents['data'] #adapt if your data variable name is different
@@ -26,7 +27,8 @@ trial_data = data[10, 500, 5, 2]
 print(trial_data)
 
 # Load frequency and phase info
-freq_phase = sio.loadmat('Freq_Phase.mat')  
+freq_phase = sio.loadmat(f'{mat_file_path}/Freq_Phase.mat')  
+print(freq_phase.keys())
 
 # Downsample data
 downsample_factor = 4  # 1000 Hz to 250 Hz
@@ -64,16 +66,15 @@ def cca_reference_signals(freqs, fs, n_harmonics=3, duration=5.5):
     return np.array(ref_signals)
 
 # Generate reference signals for target frequencies
-frequencies = freq_phase['frequencies']  # Target frequencies (8-15.8 Hz)
+frequencies = freq_phase['freqs']  # Target frequencies (8-15.8 Hz)
 ref_signals = cca_reference_signals(frequencies, fs)
 
 # CCA on a single trial
-trial = data_normalized[:, :, 0, 0]  # Example trial
+trial = data_normalized[:, 0, 0]  # Example trial
 trial_cca = trial.mean(axis=0)  # Averaging across channels for simplicity
 
 cca = CCA(n_components=1)
 cca.fit(ref_signals[0].T, trial_cca.T)
-
 
 # Train-test split, prepare dataset
 # Flatten data to shape [num_samples, num_features]

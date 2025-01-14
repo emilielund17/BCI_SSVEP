@@ -1,4 +1,6 @@
-#!/Users/HannahWolfe_1/Desktop/SSVEP-BCI-Data/BCI_SSVEP/.venv/bin/python
+#!/bin/sh
+'''exec' "/Users/emilielund/Documents/MSc Medicin og Teknologi/2. semester/22053 Principles of Brain Computer Interface /Project/BCI_SSVEP/.venv/bin/python3.12" "$0" "$@"
+' '''
 # -*- coding: utf-8 -*-
 import re
 import sys
