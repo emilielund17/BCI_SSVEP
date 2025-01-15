@@ -169,8 +169,8 @@ def main():
         print(f"Data shape after downsampling: {data.shape}")
 
         # Segment data into epochs
-        data_epochs = segment_data(data, fs)
-        print(f"Segmented data shape: {data_epochs.shape}")
+        #data_epochs = segment_data(data, fs)
+        #print(f"Segmented data shape: {data_epochs.shape}")
 
         # Normalize epochs
         data_normalized = normalize_epochs(data_epochs)
