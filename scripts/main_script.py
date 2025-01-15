@@ -56,8 +56,9 @@ def normalize_epochs(data):
 
 data_normalized = normalize_epochs(data_filtered)
 
+
 # Canonical Correlation Analysis (CCA) commonly used for SSVEP feature extraction:
-def cca_reference_signals(freqs, fs, n_harmonics=3, duration=5.5):
+""" def cca_reference_signals(freqs, fs, n_harmonics=3, duration=5.5):
     t = np.linspace(0, duration, int(fs * duration))
     ref_signals = []
     for f in freqs:
@@ -67,8 +68,36 @@ def cca_reference_signals(freqs, fs, n_harmonics=3, duration=5.5):
             signal.append(np.cos(2 * np.pi * h * f * t))
         ref_signals.append(np.array(signal))
     return np.array(ref_signals)
+ """
 
-# Generate reference signals for target frequencies
+# Canonical Correlation Analysis (CCA) commonly used for SSVEP feature extraction:
+def cca_reference_signals(frequencies, fs, n_harmonics=3, duration=5.5):
+    """
+    Generate sinusoidal reference signals for CCA.
+    
+    Args:
+        frequencies (np.ndarray): Array of target frequencies (e.g., 8-15.8 Hz).
+        fs (int): Sampling rate of the EEG data.
+        n_harmonics (int): Number of harmonics to include in the reference signals.
+        duration (float): Duration of each epoch in seconds.
+    
+    Returns:
+        np.ndarray: Reference signals with shape [num_frequencies, num_signals, num_samples].
+    """
+    t = np.linspace(0, duration, int(fs * duration))  # Time vector
+    reference_signals = []
+    
+    for f in frequencies.flatten():  # Iterate through each frequency
+        harmonic_signals = []
+        for h in range(1, n_harmonics + 1):
+            harmonic_signals.append(np.sin(2 * np.pi * h * f * t))  # Sinusoidal signal
+            harmonic_signals.append(np.cos(2 * np.pi * h * f * t))  # Cosine signal
+        reference_signals.append(np.array(harmonic_signals))
+    
+    return np.array(reference_signals)
+
+
+""" # Generate reference signals for target frequencies
 frequencies = freq_phase['freqs']  # Target frequencies (8-15.8 Hz)
 ref_signals = cca_reference_signals(frequencies, fs)
 
@@ -77,7 +106,29 @@ trial = data_normalized[:, 0, 0]  # Example trial
 trial_cca = trial.mean(axis=0)  # Averaging across channels for simplicity
 
 cca = CCA(n_components=1)
-cca.fit(ref_signals[0].T, trial_cca.T)
+cca.fit(ref_signals[0].T, trial_cca.T) """
+
+# Generate reference signals for target frequencies
+frequencies = freq_phase['freqs'].flatten()  # Ensure it's a 1D array
+ref_signals = cca_reference_signals(frequencies, fs)
+
+# Select a specific trial
+block_idx = 0  # First block
+target_idx = 0  # First target
+trial = data_normalized[:, :, target_idx, block_idx]  # Shape: [64, 1375]
+
+# Extract the reference signals for the target frequency
+ref_signals_current = ref_signals[target_idx]  # Shape: [6, 1375] (6 harmonics x 1375 time points)
+
+# Apply CCA
+cca = CCA(n_components=1)
+cca.fit(trial.T, ref_signals_current.T)  # Inputs: [1375, 64] and [1375, 6]
+
+# Transform and compute correlation
+X_c, Y_c = cca.transform(trial.T, ref_signals_current.T)
+correlation = np.corrcoef(X_c.T, Y_c.T)[0, 1]
+print(f"Correlation for Target {target_idx}: {correlation}")
+
 
 # Train-test split, prepare dataset
 # Flatten data to shape [num_samples, num_features]
