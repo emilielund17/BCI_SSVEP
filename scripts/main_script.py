@@ -7,10 +7,13 @@ from sklearn.cross_decomposition import CCA
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
+import json
 
-# Path to your .mat file
-#mat_file_path = '/Users/HannahWolfe_1/Desktop/SSVEP-BCI-Data/BCI_SSVEP/data/S1.mat' # hannah
-mat_file_path = '/Users/emilielund/Documents/MSc Medicin og Teknologi/2. semester/22053 Principles of Brain Computer Interface /Project/BCI_SSVEP/data' # emilie
+# Load the path from the config file
+with open("config.json", "r") as file:
+    config = json.load(file)
+
+mat_file_path = config["data_dir"]
 
 # Load the .mat file
 mat_contents = sio.loadmat(f'{mat_file_path}/S1.mat')
