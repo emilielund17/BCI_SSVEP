@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.io as sio
 import scipy.signal as signal
+import json
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
@@ -64,13 +65,8 @@ mat_file_path = config["data_dir"]
 # Load the .mat file
 mat_contents = sio.loadmat(f'{mat_file_path}/S1.mat')
 
-# Access the data (assuming it's named 'data' inside the .mat file)
-data = mat_contents['data'] #adapt if your data variable name is different
-
-
-data_file = 'S01.mat'
-data = sio.loadmat(data_file)
-eeg_data = data['data']  # Shape: [64, 1500, 40, 6]
+# Accessing the data 
+eeg_data = mat_contents['data'] 
 sampling_rate = 250
 
 # Preprocess and extract features
