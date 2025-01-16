@@ -18,5 +18,8 @@ ITR 34.49 bits/minute
 Time 2644s
 Average epoch time 132s
 
-ResNet with 9 electrodes
-
+ResNet with 9 electrodes (ResNet_9_electrodes.py)
+Accuracy 94.35%
+ITR 35.06 bites/minute
+Time 189s
+Average epoch time 10s
