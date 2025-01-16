@@ -1,24 +1,17 @@
+import os
 import numpy as np
 import scipy.io as sio
 import scipy.signal as signal
 import json
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+
 from tensorflow.keras.utils import to_categorical
 
 # Preprocessing function
 def preprocess_eeg(eeg_data, sampling_rate):
-    """
-    Preprocess the EEG data: filter and normalize.
-
-    Parameters:
-        eeg_data (np.ndarray): Raw EEG data with shape (channels, time_points).
-        sampling_rate (int): Sampling rate of the EEG data.
-
-    Returns:
-        preprocessed_eeg (np.ndarray): Preprocessed EEG data.
-    """
     # Bandpass filter (e.g., 7-90 Hz)
     nyquist = sampling_rate / 2
     low, high = 7 / nyquist, 90 / nyquist
@@ -32,17 +25,6 @@ def preprocess_eeg(eeg_data, sampling_rate):
 
 # Feature extraction function
 def extract_features(eeg_data, sampling_rate, num_harmonics=3):
-    """
-    Extract features from EEG data using FFT for SSVEP classification.
-
-    Parameters:
-        eeg_data (np.ndarray): EEG data with shape (channels, time_points).
-        sampling_rate (int): Sampling rate of the EEG data.
-        num_harmonics (int): Number of harmonics to include.
-
-    Returns:
-        features (np.ndarray): Extracted features.
-    """
     fft_data = np.abs(np.fft.rfft(eeg_data, axis=1))
     freqs = np.fft.rfftfreq(eeg_data.shape[1], d=1 / sampling_rate)
 
@@ -55,31 +37,34 @@ def extract_features(eeg_data, sampling_rate, num_harmonics=3):
 
     return np.array(features).T
 
-# Load EEG Data
-# Load the path from the config file
+# Load configuration
 with open("config.json", "r") as file:
     config = json.load(file)
 
-mat_file_path = config["data_dir"]
+data_dir = config["data_dir"]  # Folder containing .mat files
+sampling_rate = 250  # Set sampling rate
 
-# Load the .mat file
-mat_contents = sio.loadmat(f'{mat_file_path}/S1.mat')
-
-# Accessing the data 
-eeg_data = mat_contents['data'] 
-sampling_rate = 250
-
-# Preprocess and extract features
+# Preprocess and extract features for all subjects
 X, y = [], []
 frequencies = np.arange(8, 15.8, 0.2)
 
-for subject_idx in range(eeg_data.shape[3]):
-    for trial_idx in range(40):
-        raw_trial = eeg_data[:, :, trial_idx, subject_idx]
-        preprocessed_trial = preprocess_eeg(raw_trial, sampling_rate)
-        features = extract_features(preprocessed_trial, sampling_rate)
-        X.append(features)
-        y.append(trial_idx // 6)  # Assuming 6 blocks per frequency
+# Loop through all subject files in the folder
+for mat_file in os.listdir(data_dir):
+    if mat_file.endswith(".mat") and mat_file.startswith('S'): 
+        print(f"Processing file: {mat_file}")
+        
+        # Load the .mat file
+        mat_contents = sio.loadmat(os.path.join(data_dir, mat_file))
+        eeg_data = mat_contents['data']  # Shape: [64, 1500, 40, 6]
+        
+        # Loop through blocks and trials
+        for block_idx in range(eeg_data.shape[3]):
+            for trial_idx in range(40):
+                raw_trial = eeg_data[:, :, trial_idx, block_idx]
+                preprocessed_trial = preprocess_eeg(raw_trial, sampling_rate)
+                features = extract_features(preprocessed_trial, sampling_rate)
+                X.append(features)
+                y.append(trial_idx // 6)  # Assuming 6 blocks per frequency
 
 X = np.array(X)
 X = X[..., np.newaxis]  # Add channel dimension for CNN
@@ -107,9 +92,32 @@ model = Sequential([
 # Compile the model
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
-# Train the model
-model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test))
+# Train the model and capture history
+history=model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test))
 
 # Evaluate the model
 test_loss, test_acc = model.evaluate(X_test, y_test)
 print(f"Test Accuracy: {test_acc * 100:.2f}%")
+
+# Plot training & validation accuracy values
+plt.figure(figsize=(12, 6))
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.title('Model Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Plot training & validation loss values
+plt.figure(figsize=(12, 6))
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Model Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.grid(True)
+plt.show()
+
