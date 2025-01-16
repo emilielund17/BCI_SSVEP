@@ -55,6 +55,19 @@ def extract_features(eeg_data, sampling_rate, num_harmonics=3):
     return np.array(features).T
 
 # Load EEG Data
+# Load the path from the config file
+with open("config.json", "r") as file:
+    config = json.load(file)
+
+mat_file_path = config["data_dir"]
+
+# Load the .mat file
+mat_contents = sio.loadmat(f'{mat_file_path}/S1.mat')
+
+# Access the data (assuming it's named 'data' inside the .mat file)
+data = mat_contents['data'] #adapt if your data variable name is different
+
+
 data_file = 'S01.mat'
 data = sio.loadmat(data_file)
 eeg_data = data['data']  # Shape: [64, 1500, 40, 6]
