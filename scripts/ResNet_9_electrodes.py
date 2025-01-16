@@ -5,9 +5,13 @@ import scipy.signal as signal
 import json
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization, Activation, Add
 from tensorflow.keras.utils import to_categorical
+
+# Selected electrodes: Pz, PO5, PO3, POz, PO4, PO6, O1, Oz, O2
+selected_electrodes = [48, 54, 55, 56, 57, 58, 61, 62, 63]  # 1-based indices from the electrode placement file
+selected_indices = [i - 1 for i in selected_electrodes]  # Convert to 0-based indices
 
 # Preprocessing function
 def preprocess_eeg(eeg_data, sampling_rate):
@@ -36,6 +40,31 @@ def extract_features(eeg_data, sampling_rate, num_harmonics=3):
 
     return np.array(features).T
 
+# Residual block function
+def residual_block(x, filters, kernel_size=(3, 3), strides=(1, 1)):
+    # Shortcut connection
+    shortcut = x
+
+    # Project the shortcut to match the number of filters if necessary
+    if x.shape[-1] != filters:
+        shortcut = Conv2D(filters, (1, 1), strides=strides, padding="same")(x)
+        shortcut = BatchNormalization()(shortcut)
+
+    # First convolution
+    x = Conv2D(filters, kernel_size, strides=strides, padding="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+
+    # Second convolution
+    x = Conv2D(filters, kernel_size, strides=(1, 1), padding="same")(x)
+    x = BatchNormalization()(x)
+
+    # Add shortcut to the output
+    x = Add()([shortcut, x])
+    x = Activation("relu")(x)
+    return x
+
+
 # Load configuration
 with open("config.json", "r") as file:
     config = json.load(file)
@@ -49,13 +78,16 @@ frequencies = np.arange(8, 15.8, 0.2)
 
 # Loop through all subject files in the folder
 for mat_file in os.listdir(data_dir):
-    if mat_file.endswith(".mat") and mat_file.startswith('S'): 
+    if mat_file.endswith(".mat") and mat_file.startswith('S'):
         print(f"Processing file: {mat_file}")
-        
+
         # Load the .mat file
         mat_contents = sio.loadmat(os.path.join(data_dir, mat_file))
         eeg_data = mat_contents['data']  # Shape: [64, 1500, 40, 6]
-        
+
+        # Select only the 9 desired electrodes
+        eeg_data = eeg_data[selected_indices, :, :, :]
+
         # Loop through blocks and trials
         for block_idx in range(eeg_data.shape[3]):
             for trial_idx in range(40):
@@ -74,25 +106,39 @@ y = to_categorical(y, num_classes=len(frequencies))
 # Split data into train and test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Build CNN Model
-model = Sequential([
-    Conv2D(32, (3, 3), activation='relu', input_shape=X_train.shape[1:]),
-    MaxPooling2D((2, 2)),
-    Dropout(0.3),
-    Conv2D(64, (3, 3), activation='relu'),
-    MaxPooling2D((2, 2)),
-    Dropout(0.3),
-    Flatten(),
-    Dense(128, activation='relu'),
-    Dropout(0.5),
-    Dense(len(frequencies), activation='softmax')
-])
+# Build ResNet Model
+input_shape = X_train.shape[1:]
+inputs = Input(shape=input_shape)
+
+# Initial Conv Layer
+x = Conv2D(32, (3, 3), padding="same", activation="relu")(inputs)
+x = MaxPooling2D((2, 2))(x)
+
+# Residual Blocks
+x = residual_block(x, filters=32)
+x = residual_block(x, filters=32)
+
+# Down-sampling
+x = MaxPooling2D((2, 2))(x)
+
+# More Residual Blocks
+x = residual_block(x, filters=64)
+x = residual_block(x, filters=64)
+
+# Flatten and Fully Connected Layers
+x = Flatten()(x)
+x = Dense(128, activation="relu")(x)
+x = Dropout(0.5)(x)
+outputs = Dense(len(frequencies), activation="softmax")(x)
+
+# Create the model
+model = Model(inputs, outputs)
 
 # Compile the model
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
 
 # Train the model and capture history
-history=model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test))
+history = model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test))
 
 # Function to calculate ITR
 def calculate_itr(T, N, P):
@@ -148,4 +194,3 @@ plt.ylabel('Loss')
 plt.legend()
 plt.grid(True)
 plt.show()
-

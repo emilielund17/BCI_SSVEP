@@ -9,6 +9,10 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 from tensorflow.keras.utils import to_categorical
 
+# Selected electrodes: Pz, PO5, PO3, POz, PO4, PO6, O1, Oz, O2
+selected_electrodes = [48, 54, 55, 56, 57, 58, 61, 62, 63]  # 1-based indices from the electrode placement file
+selected_indices = [i - 1 for i in selected_electrodes]  # Convert to 0-based indices
+
 # Preprocessing function
 def preprocess_eeg(eeg_data, sampling_rate):
     # Bandpass filter (e.g., 7-90 Hz)
@@ -49,13 +53,16 @@ frequencies = np.arange(8, 15.8, 0.2)
 
 # Loop through all subject files in the folder
 for mat_file in os.listdir(data_dir):
-    if mat_file.endswith(".mat") and mat_file.startswith('S'): 
+    if mat_file.endswith(".mat") and mat_file.startswith('S'):
         print(f"Processing file: {mat_file}")
-        
+
         # Load the .mat file
         mat_contents = sio.loadmat(os.path.join(data_dir, mat_file))
         eeg_data = mat_contents['data']  # Shape: [64, 1500, 40, 6]
-        
+
+        # Select only the 9 desired electrodes
+        eeg_data = eeg_data[selected_indices, :, :, :]
+
         # Loop through blocks and trials
         for block_idx in range(eeg_data.shape[3]):
             for trial_idx in range(40):
@@ -77,10 +84,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 # Build CNN Model
 model = Sequential([
     Conv2D(32, (3, 3), activation='relu', input_shape=X_train.shape[1:]),
-    MaxPooling2D((2, 2)),
+    MaxPooling2D((1, 2)),
     Dropout(0.3),
     Conv2D(64, (3, 3), activation='relu'),
-    MaxPooling2D((2, 2)),
+    MaxPooling2D((1, 2)),
     Dropout(0.3),
     Flatten(),
     Dense(128, activation='relu'),
@@ -92,7 +99,7 @@ model = Sequential([
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Train the model and capture history
-history=model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test))
+history = model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test))
 
 # Function to calculate ITR
 def calculate_itr(T, N, P):
@@ -126,7 +133,6 @@ P = test_acc  # Model's accuracy on test set
 itr = calculate_itr(T, N, P)
 print(f"Information Transfer Rate (ITR): {itr:.2f} bits/minute")
 
-
 # Plot training & validation accuracy values
 plt.figure(figsize=(12, 6))
 plt.plot(history.history['accuracy'], label='Training Accuracy')
@@ -148,4 +154,3 @@ plt.ylabel('Loss')
 plt.legend()
 plt.grid(True)
 plt.show()
-
