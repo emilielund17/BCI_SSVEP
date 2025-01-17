@@ -3,10 +3,11 @@ import numpy as np
 import scipy.io as sio
 import scipy.signal as signal
 import json
+import time
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization
 from tensorflow.keras.utils import to_categorical
 
 # Preprocessing function
@@ -29,7 +30,7 @@ def extract_features(eeg_data, sampling_rate, num_harmonics=3):
 
     # Select features at fundamental and harmonic frequencies
     features = []
-    for freq in np.arange(8, 15.8, 0.2):  # Stimulus frequencies
+    for freq in np.arange(8, 16, 0.2):  # Stimulus frequencies
         for h in range(1, num_harmonics + 1):
             idx = np.argmin(np.abs(freqs - (freq * h)))
             features.append(fft_data[:, idx])
@@ -76,23 +77,42 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # Build CNN Model
 model = Sequential([
-    Conv2D(32, (3, 3), activation='relu', input_shape=X_train.shape[1:]),
+    Conv2D(32, (3, 3), padding='same', input_shape=X_train.shape[1:]),
+    BatchNormalization(),  # Normalize activations
+    Activation('relu'),
     MaxPooling2D((2, 2)),
     Dropout(0.3),
-    Conv2D(64, (3, 3), activation='relu'),
+    
+    Conv2D(64, (3, 3), padding='same'),
+    BatchNormalization(),  # Normalize activations
+    Activation('relu'),
     MaxPooling2D((2, 2)),
     Dropout(0.3),
+    
     Flatten(),
-    Dense(128, activation='relu'),
+    Dense(128),
+    BatchNormalization(),  # Normalize activations
+    Activation('relu'),
     Dropout(0.5),
-    Dense(len(frequencies), activation='softmax')
+    
+    Dense(len(frequencies), activation='softmax')  # Output layer
 ])
 
 # Compile the model
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
+# Get the script name
+script_name = os.path.basename('CNN all electrodes')
+
+# Start timing the training
+start_time = time.time()
+
 # Train the model and capture history
 history=model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test))
+
+# End timing
+end_time = time.time()
+training_time = end_time - start_time
 
 # Function to calculate ITR
 def calculate_itr(T, N, P):
@@ -126,6 +146,16 @@ P = test_acc  # Model's accuracy on test set
 itr = calculate_itr(T, N, P)
 print(f"Information Transfer Rate (ITR): {itr:.2f} bits/minute")
 
+# Write metrics to a text file (append mode)
+output_file = "model_metrics.txt"
+with open(output_file, "a") as f:
+    f.write(f"\n--- Results from Script: {script_name} ---\n")
+    f.write(f"Test Accuracy: {test_acc * 100:.2f}%\n")
+    f.write(f"Information Transfer Rate (ITR): {itr:.2f} bits/minute\n")
+    f.write(f"Training Time: {training_time:.2f} seconds\n")
+    f.write("-" * 40 + "\n")
+
+print(f"Metrics appended to {output_file}")
 
 # Plot training & validation accuracy values
 plt.figure(figsize=(12, 6))

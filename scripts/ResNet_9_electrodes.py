@@ -3,6 +3,7 @@ import numpy as np
 import scipy.io as sio
 import scipy.signal as signal
 import json
+import time
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Model
@@ -33,7 +34,7 @@ def extract_features(eeg_data, sampling_rate, num_harmonics=3):
 
     # Select features at fundamental and harmonic frequencies
     features = []
-    for freq in np.arange(8, 15.8, 0.2):  # Stimulus frequencies
+    for freq in np.arange(8, 16, 0.2):  # Stimulus frequencies
         for h in range(1, num_harmonics + 1):
             idx = np.argmin(np.abs(freqs - (freq * h)))
             features.append(fft_data[:, idx])
@@ -74,7 +75,7 @@ sampling_rate = 250  # Set sampling rate
 
 # Preprocess and extract features for all subjects
 X, y = [], []
-frequencies = np.arange(8, 15.8, 0.2)
+frequencies = np.arange(8, 16, 0.2)
 
 # Loop through all subject files in the folder
 for mat_file in os.listdir(data_dir):
@@ -137,8 +138,18 @@ model = Model(inputs, outputs)
 # Compile the model
 model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
 
+# Get the script name
+script_name = os.path.basename('ResNet 9 electrodes 40 epochs')
+
+# Start timing the training
+start_time = time.time()
+
 # Train the model and capture history
-history = model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test))
+history = model.fit(X_train, y_train, epochs=40, batch_size=32, validation_data=(X_test, y_test))
+
+# End timing
+end_time = time.time()
+training_time = end_time - start_time
 
 # Function to calculate ITR
 def calculate_itr(T, N, P):
@@ -172,6 +183,16 @@ P = test_acc  # Model's accuracy on test set
 itr = calculate_itr(T, N, P)
 print(f"Information Transfer Rate (ITR): {itr:.2f} bits/minute")
 
+# Write metrics to a text file (append mode)
+output_file = "model_metrics.txt"
+with open(output_file, "a") as f:
+    f.write(f"\n--- Results from Script: {script_name} ---\n")
+    f.write(f"Test Accuracy: {test_acc * 100:.2f}%\n")
+    f.write(f"Information Transfer Rate (ITR): {itr:.2f} bits/minute\n")
+    f.write(f"Training Time: {training_time:.2f} seconds\n")
+    f.write("-" * 40 + "\n")
+
+print(f"Metrics appended to {output_file}")
 
 # Plot training & validation accuracy values
 plt.figure(figsize=(12, 6))

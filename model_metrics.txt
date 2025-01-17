@@ -1,0 +1,25 @@
+
+--- Results from Script: ResNet all electrodes ---
+Test Accuracy: 94.76%
+Information Transfer Rate (ITR): 35.61 bits/minute
+Training Time: 1446.41 seconds
+----------------------------------------
+
+
+--- Results from Script: ResNet 9 electrodes ---
+Test Accuracy: 94.70%
+Information Transfer Rate (ITR): 35.57 bits/minute
+Training Time: 853.84 seconds
+----------------------------------------
+
+--- Results from Script: ResNet 9 electrodes 40 epochs ---
+Test Accuracy: 95.24%
+Information Transfer Rate (ITR): 35.96 bits/minute
+Training Time: 442.47 seconds
+----------------------------------------
+
+--- Results from Script: ResNet all electrodes 40 epochs ---
+Test Accuracy: 92.80%
+Information Transfer Rate (ITR): 34.26 bits/minute
+Training Time: 3285.24 seconds
+----------------------------------------
