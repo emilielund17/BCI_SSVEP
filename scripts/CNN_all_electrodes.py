@@ -7,7 +7,7 @@ import time
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization, Activation
 from tensorflow.keras.utils import to_categorical
 
 # Preprocessing function
@@ -46,7 +46,7 @@ sampling_rate = 250  # Set sampling rate
 
 # Preprocess and extract features for all subjects
 X, y = [], []
-frequencies = np.arange(8, 15.8, 0.2)
+frequencies = np.arange(8, 16, 0.2)
 
 # Loop through all subject files in the folder
 for mat_file in os.listdir(data_dir):

@@ -30,7 +30,7 @@ def extract_features(eeg_data, sampling_rate, num_harmonics=3):
 
     # Select features at fundamental and harmonic frequencies
     features = []
-    for freq in np.arange(8, 15.8, 0.2):  # Stimulus frequencies
+    for freq in np.arange(8, 16, 0.2):  # Stimulus frequencies
         for h in range(1, num_harmonics + 1):
             idx = np.argmin(np.abs(freqs - (freq * h)))
             features.append(fft_data[:, idx])

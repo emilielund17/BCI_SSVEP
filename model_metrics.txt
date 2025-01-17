@@ -23,3 +23,15 @@ Test Accuracy: 92.80%
 Information Transfer Rate (ITR): 34.26 bits/minute
 Training Time: 3285.24 seconds
 ----------------------------------------
+
+--- Results from Script: CNN all electrodes ---
+Test Accuracy: 90.48%
+Information Transfer Rate (ITR): 32.74 bits/minute
+Training Time: 684.35 seconds
+----------------------------------------
+
+--- Results from Script: CNN 9 electrodes ---
+Test Accuracy: 93.33%
+Information Transfer Rate (ITR): 34.62 bits/minute
+Training Time: 412.46 seconds
+----------------------------------------
