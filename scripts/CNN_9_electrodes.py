@@ -79,27 +79,28 @@ X = X[..., np.newaxis]  # Add channel dimension for CNN
 # Encode labels
 y = to_categorical(y, num_classes=len(frequencies))
 
-# Split data into train and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Split data into train, test and validation sets
+X_train, X_eval, y_train, y_eval = train_test_split(X, y, test_size=0.15, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.15, random_state=42)
 
 # Build CNN Model
 model = Sequential([
     Conv2D(32, (3, 3), padding='same', input_shape=X_train.shape[1:]),
     BatchNormalization(),  # Normalize activations
-    Activation('relu'),
+    Activation('elu'),
     MaxPooling2D((2, 2)),
     Dropout(0.3),
     
     Conv2D(64, (3, 3), padding='same'),
     BatchNormalization(),  # Normalize activations
-    Activation('relu'),
+    Activation('elu'),
     MaxPooling2D((2, 2)),
     Dropout(0.3),
     
     Flatten(),
     Dense(128),
     BatchNormalization(),  # Normalize activations
-    Activation('relu'),
+    Activation('elu'),
     Dropout(0.5),
     
     Dense(len(frequencies), activation='softmax')  # Output layer
@@ -109,13 +110,13 @@ model = Sequential([
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Get the script name
-script_name = os.path.basename('CNN 9 electrodes')
+script_name = os.path.basename('CNN 9 electrodes coorected eval 40 epoch')
 
 # Start timing the training
 start_time = time.time()
 
 # Train the model and capture history
-history = model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test))
+history = model.fit(X_train, y_train, epochs=40, batch_size=32, validation_data=(X_test, y_test))
 
 # End timing
 end_time = time.time()
@@ -141,7 +142,7 @@ def calculate_itr(T, N, P):
     return itr
 
 # Evaluate the model
-test_loss, test_acc = model.evaluate(X_test, y_test)
+test_loss, test_acc = model.evaluate(X_eval, y_eval)
 print(f"Test Accuracy: {test_acc * 100:.2f}%")
 
 # Parameters for ITR

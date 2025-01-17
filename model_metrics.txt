@@ -35,3 +35,9 @@ Test Accuracy: 93.33%
 Information Transfer Rate (ITR): 34.62 bits/minute
 Training Time: 412.46 seconds
 ----------------------------------------
+
+--- Results from Script: CNN 9 electrodes coorected eval ---
+Test Accuracy: 92.46%
+Information Transfer Rate (ITR): 34.03 bits/minute
+Training Time: 215.15 seconds
+----------------------------------------

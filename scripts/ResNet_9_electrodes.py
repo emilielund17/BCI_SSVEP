@@ -54,7 +54,7 @@ def residual_block(x, filters, kernel_size=(3, 3), strides=(1, 1)):
     # First convolution
     x = Conv2D(filters, kernel_size, strides=strides, padding="same")(x)
     x = BatchNormalization()(x)
-    x = Activation("relu")(x)
+    x = Activation("elu")(x)
 
     # Second convolution
     x = Conv2D(filters, kernel_size, strides=(1, 1), padding="same")(x)
@@ -62,7 +62,7 @@ def residual_block(x, filters, kernel_size=(3, 3), strides=(1, 1)):
 
     # Add shortcut to the output
     x = Add()([shortcut, x])
-    x = Activation("relu")(x)
+    x = Activation("elu")(x)
     return x
 
 
@@ -104,15 +104,17 @@ X = X[..., np.newaxis]  # Add channel dimension for CNN
 # Encode labels
 y = to_categorical(y, num_classes=len(frequencies))
 
-# Split data into train and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Split data into train, test and validation sets
+X_train, X_eval, y_train, y_eval = train_test_split(X, y, test_size=0.15, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.15, random_state=42)
+
 
 # Build ResNet Model
 input_shape = X_train.shape[1:]
 inputs = Input(shape=input_shape)
 
 # Initial Conv Layer
-x = Conv2D(32, (3, 3), padding="same", activation="relu")(inputs)
+x = Conv2D(32, (3, 3), padding="same", activation="elu")(inputs)
 x = MaxPooling2D((2, 2))(x)
 
 # Residual Blocks
@@ -128,7 +130,7 @@ x = residual_block(x, filters=64)
 
 # Flatten and Fully Connected Layers
 x = Flatten()(x)
-x = Dense(128, activation="relu")(x)
+x = Dense(128, activation="elu")(x)
 x = Dropout(0.5)(x)
 outputs = Dense(len(frequencies), activation="softmax")(x)
 
@@ -139,7 +141,7 @@ model = Model(inputs, outputs)
 model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
 
 # Get the script name
-script_name = os.path.basename('ResNet 9 electrodes 40 epochs')
+script_name = os.path.basename('ResNet 9 electrodes corrected eval 40 epochs')
 
 # Start timing the training
 start_time = time.time()
@@ -171,7 +173,7 @@ def calculate_itr(T, N, P):
     return itr
 
 # Evaluate the model
-test_loss, test_acc = model.evaluate(X_test, y_test)
+test_loss, test_acc = model.evaluate(X_eval, y_eval)
 print(f"Test Accuracy: {test_acc * 100:.2f}%")
 
 # Parameters for ITR
