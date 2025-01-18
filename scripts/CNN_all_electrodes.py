@@ -103,13 +103,13 @@ model = Sequential([
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Get the script name
-script_name = os.path.basename('CNN all electrodes corrected eval')
+script_name = os.path.basename('CNN all electrodes corrected eval 40 epoch')
 
 # Start timing the training
 start_time = time.time()
 
 # Train the model and capture history
-history=model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test))
+history=model.fit(X_train, y_train, epochs=40, batch_size=32, validation_data=(X_test, y_test))
 
 # End timing
 end_time = time.time()
