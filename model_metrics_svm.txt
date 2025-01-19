@@ -1,0 +1,6 @@
+
+--- Results from SVM Classifier ---
+Evaluation Accuracy: 72.06%
+Information Transfer Rate (ITR): 22.43 bits/minute
+Training Time: 688.56 seconds
+----------------------------------------

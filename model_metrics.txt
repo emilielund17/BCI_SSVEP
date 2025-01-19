@@ -49,8 +49,6 @@ Training Time: 1795.27 seconds
 Overfitter
 ----------------------------------------
 
-
-
 --- Results from Script: CNN 9 electrodes coorected eval 40 epoch ---
 Test Accuracy: 93.10%
 Information Transfer Rate (ITR): 34.46 bits/minute
@@ -62,4 +60,53 @@ Converging together and then seperating a bit
 Test Accuracy: 92.38%
 Information Transfer Rate (ITR): 33.98 bits/minute
 Training Time: 69297.02 seconds
+----------------------------------------
+
+--- Results from Script: ResNet 9 electrodes corrected eval 40 epochs ---
+Test Accuracy: 93.97%
+Information Transfer Rate (ITR): 35.06 bits/minute
+Training Time: 379.54 seconds
+Overfitter (training converges at .99 and validation converges at .94)
+----------------------------------------
+
+--- Results from Script: CNN 9 electrodes coorected eval 40 epoch ---
+Test Accuracy: 92.78%
+Information Transfer Rate (ITR): 34.25 bits/minute
+Training Time: 294.13 seconds
+----------------------------------------
+
+--- Results from Script: ResNet 9 electrodes corrected eval 20 epochs fewer filters ---
+Test Accuracy: 93.17%
+Information Transfer Rate (ITR): 34.51 bits/minute
+Training Time: 562.69 seconds
+----------------------------------------
+
+--- Results from Script: ResNet 9 electrodes corrected eval 20 epochs fewer filters ---
+Test Accuracy: 93.10%
+Information Transfer Rate (ITR): 34.46 bits/minute
+Training Time: 525.80 seconds
+----------------------------------------
+
+--- Results from Script: ResNet 9 electrodes corrected eval 20 epochs fewer filters ---
+Test Accuracy: 93.10%
+Information Transfer Rate (ITR): 34.21 bits/minute
+Training Time: 152.77 seconds
+----------------------------------------
+
+--- Results from Script: ResNet 9 electrodes corrected eval 20 epochs fewer filters ---
+Test Accuracy: 92.54%
+Information Transfer Rate (ITR): 33.83 bits/minute
+Training Time: 152.90 seconds
+----------------------------------------
+
+--- Results from Script: ResNet 9 electrodes corrected eval 20 epochs fewer filters ---
+Test Accuracy: 90.32%
+Information Transfer Rate (ITR): 32.39 bits/minute
+Training Time: 152.90 seconds
+----------------------------------------
+
+--- Results from Script: CNN all electrodes corrected eval 20 epoch fewer filters ---
+Test Accuracy: 88.65%
+Information Transfer Rate (ITR): 31.59 bits/minute
+Training Time: 356.15 seconds
 ----------------------------------------
