@@ -111,3 +111,9 @@ Test Accuracy: 92.14%
 Information Transfer Rate (ITR): 33.82 bits/minute
 Training Time: 1398.46 seconds
 ----------------------------------------
+
+--- Results from Script: ResNet 64 electrodes ---
+Test Accuracy: 89.60%
+Information Transfer Rate (ITR): 32.18 bits/minute
+Training Time: 1786.45 seconds
+Test loss:0.69/n----------------------------------------
