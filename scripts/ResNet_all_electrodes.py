@@ -99,26 +99,26 @@ y = to_categorical(y, num_classes=len(frequencies))
 
 # Split data into train, test and validation sets
 X_train, X_eval, y_train, y_eval = train_test_split(X, y, test_size=0.15, random_state=42)
-X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.15, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.20, random_state=42)
 
 # Build ResNet Model
 input_shape = X_train.shape[1:]
 inputs = Input(shape=input_shape)
 
 # Initial Conv Layer
-x = Conv2D(32, (3, 3), padding="same", activation="elu")(inputs)
+x = Conv2D(16, (3, 3), padding="same", activation="elu")(inputs)
 x = MaxPooling2D((2, 2))(x)
 
 # Residual Blocks
-x = residual_block(x, filters=32)
-x = residual_block(x, filters=32)
+x = residual_block(x, filters=16)
+x = residual_block(x, filters=16)
 
 # Down-sampling
 x = MaxPooling2D((2, 2))(x)
 
 # More Residual Blocks
-x = residual_block(x, filters=64)
-x = residual_block(x, filters=64)
+x = residual_block(x, filters=32)
+x = residual_block(x, filters=32)
 
 # Flatten and Fully Connected Layers
 x = Flatten()(x)
@@ -133,13 +133,13 @@ model = Model(inputs, outputs)
 model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
 
 # Get the script name
-script_name = os.path.basename('ResNet all electrodes corrected eval 40 epochs')
+script_name = os.path.basename('ResNet all electrodes corrected eval 20 epochs')
 
 # Start timing the training
 start_time = time.time()
 
 # Train the model and capture history
-history = model.fit(X_train, y_train, epochs=40, batch_size=32, validation_data=(X_test, y_test))
+history = model.fit(X_train, y_train, epochs=20, batch_size=16, validation_data=(X_test, y_test))
 
 # End timing
 end_time = time.time()

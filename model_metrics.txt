@@ -87,3 +87,27 @@ Information Transfer Rate (ITR): 34.46 bits/minute
 Training Time: 525.80 seconds
 Still overfitting
 ----------------------------------------
+
+--- Results from Script: ResNet 9 electrodes corrected eval 20 epochs fewer filters ---
+Test Accuracy: 92.30%
+Information Transfer Rate (ITR): 33.93 bits/minute
+Training Time: 169.93 seconds
+----------------------------------------
+
+--- Results from Script: ResNet all electrodes corrected eval 20 epochs ---
+Test Accuracy: 91.90%
+Information Transfer Rate (ITR): 33.66 bits/minute
+Training Time: 2167.64 seconds
+----------------------------------------
+
+--- Results from Script: ResNet 9 electrodes corrected eval 20 epochs fewer filters ---
+Test Accuracy: 93.25%
+Information Transfer Rate (ITR): 34.57 bits/minute
+Training Time: 685.66 seconds
+----------------------------------------
+
+--- Results from Script: ResNet 9 electrodes corrected eval 20 epochs fewer filters ---
+Test Accuracy: 92.14%
+Information Transfer Rate (ITR): 33.82 bits/minute
+Training Time: 1398.46 seconds
+----------------------------------------
