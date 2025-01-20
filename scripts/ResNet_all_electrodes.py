@@ -184,6 +184,7 @@ with open(output_file, "a") as f:
     f.write(f"Test Accuracy: {test_acc * 100:.2f}%\n")
     f.write(f"Information Transfer Rate (ITR): {itr:.2f} bits/minute\n")
     f.write(f"Training Time: {training_time:.2f} seconds\n")
+    f.write(f"Test loss:{test_loss:.2f}/n")
     f.write("-" * 40 + "\n")
 
 print(f"Metrics appended to {output_file}")

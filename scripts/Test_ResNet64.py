@@ -12,10 +12,6 @@ from tensorflow.keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense,
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.optimizers import Adam
 
-# Selected electrodes: Pz, PO5, PO3, POz, PO4, PO6, O1, Oz, O2
-selected_electrodes = [48, 54, 55, 56, 57, 58, 61, 62, 63]  # 1-based indices from the electrode placement file
-selected_indices = [i - 1 for i in selected_electrodes]  # Convert to 0-based indices
-
 # Preprocessing function
 def preprocess_eeg(eeg_data, sampling_rate):
     # Bandpass filter (e.g., 7-90 Hz)
@@ -88,9 +84,6 @@ for mat_file in os.listdir(data_dir):
         mat_contents = sio.loadmat(os.path.join(data_dir, mat_file))
         eeg_data = mat_contents['data']  # Shape: [64, 1500, 40, 6]
 
-        # Select only the 9 desired electrodes
-        eeg_data = eeg_data[selected_indices, :, :, :]
-
         # Loop through blocks and trials
         for block_idx in range(eeg_data.shape[3]):
             for trial_idx in range(40):
@@ -155,7 +148,7 @@ optimizer = Adam(learning_rate=0.0001)
 model.compile(optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"])
 
 # Get the script name
-script_name = os.path.basename('ResNet 9 electrodes corrected eval 20 epochs fewer filters')
+script_name = os.path.basename('ResNet 64 electrodes')
 
 # Start timing the training
 start_time = time.time()
@@ -206,6 +199,7 @@ with open(output_file, "a") as f:
     f.write(f"Test Accuracy: {test_acc * 100:.2f}%\n")
     f.write(f"Information Transfer Rate (ITR): {itr:.2f} bits/minute\n")
     f.write(f"Training Time: {training_time:.2f} seconds\n")
+    f.write(f"Test loss:{test_loss:.2f}/n")
     f.write("-" * 40 + "\n")
 
 print(f"Metrics appended to {output_file}")
