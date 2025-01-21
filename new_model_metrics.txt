@@ -1,0 +1,44 @@
+
+--- Results from Script: ResNet9 cross validation ---
+Eval Accuracy: 93.10%
+Information Transfer Rate (ITR): 34.46 bits/minute
+Eval loss:0.57
+----------------------------------------
+
+
+--- Results from Script: ResNet64 cross validation ---
+Eval Accuracy: 89.76%
+Information Transfer Rate (ITR): 32.28 bits/minute
+Eval loss:0.74
+----------------------------------------
+
+
+--- Results from Script: CNN9 cross validation ---
+Eval Accuracy: 87.70%
+Information Transfer Rate (ITR): 31.00 bits/minute
+Eval loss:0.65
+----------------------------------------
+
+--- Results from Script: CNN9 cross validation ---
+Eval Accuracy: 88.81%
+Information Transfer Rate (ITR): 31.69 bits/minute
+Eval loss:0.60
+Fewer filters
+----------------------------------------
+
+--- Results from Script: CNN64 cross validation ---
+Eval Accuracy: 80.16%
+Information Transfer Rate (ITR): 26.66 bits/minute
+
+--- Results from Script: CNN64 cross validation ---
+Eval Accuracy: 80.16%
+Information Transfer Rate (ITR): 26.66 bits/minute
+Eval loss:0.95
+Fewer filters (peak on training curve at epoch 15)
+----------------------------------------
+
+--- Results from Script: CNN9 cross validation ---
+Eval Accuracy: 90.79%
+Information Transfer Rate (ITR): 32.94 bits/minute
+Eval loss:0.53
+----------------------------------------
