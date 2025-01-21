@@ -98,14 +98,14 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(X_train)):
     x = Conv2D(16, (3, 3), padding="same", activation="elu", kernel_regularizer=l2(0.001))(inputs)
     x = BatchNormalization()(x)
     x = Activation("elu")(x)
-    x = Dropout(0.3)(x)
+    x = Dropout(0.1)(x)
     x = Conv2D(32, (3, 3), padding="same", activation="elu", kernel_regularizer=l2(0.001))(x)
     x = BatchNormalization()(x)
     x = Activation("elu")(x)
     x = MaxPooling2D((2, 2))(x)
+    x = Dropout(0.1)(x)
     x = residual_block(x, filters=16)
     x = residual_block(x, filters=16)
-    # x = MaxPooling2D((2, 2))(x)
     x = residual_block(x, filters=32)
     x = residual_block(x, filters=32)
     x = MaxPooling2D((2, 2))(x)
@@ -121,7 +121,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(X_train)):
 
     # Train model
     history = model.fit(fold_X_train, fold_y_train, 
-                        epochs=20, 
+                        epochs=30, 
                         batch_size=16, 
                         validation_data=(fold_X_test, fold_y_test), 
                         verbose=1)

@@ -112,7 +112,6 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(X_train)):
     x = Dropout(0.1)(x)
     x = residual_block(x, filters=16)
     x = residual_block(x, filters=16)
-    x = MaxPooling2D((2, 2))(x)
     x = residual_block(x, filters=32)
     x = residual_block(x, filters=32)
     x = MaxPooling2D((2, 2))(x)
@@ -128,7 +127,7 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(X_train)):
 
     # Train model
     history = model.fit(fold_X_train, fold_y_train, 
-                        epochs=20, 
+                        epochs=30, 
                         batch_size=16, 
                         validation_data=(fold_X_test, fold_y_test), 
                         verbose=1)
