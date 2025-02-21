@@ -109,3 +109,38 @@ Information Transfer Rate (ITR): 34.19 bits/minute
 Training Time: 772.47 seconds
 Eval loss:0.63
 ----------------------------------------
+--- Results from Script: CNN9 cross validation ---
+Eval Accuracy: 92.78%
+Information Transfer Rate (ITR): 34.25 bits/minute
+Eval loss:0.42
+----------------------------------------
+
+--- Results from Script: CNN9 cross validation with 4 harmonics ---
+Eval Accuracy: 91.83%
+Information Transfer Rate (ITR): 33.61 bits/minute
+Eval loss:0.44
+----------------------------------------
+
+--- Results from Script: CNN9 cross validation with 4 harmonics ---
+Eval Accuracy: 91.75%
+Information Transfer Rate (ITR): 33.56 bits/minute
+Eval loss:0.47
+----------------------------------------
+
+--- Results from Script: CNN9 cross validation with 5 harmonics ---
+Eval Accuracy: 91.75%
+Information Transfer Rate (ITR): 33.56 bits/minute
+Eval loss:0.47
+----------------------------------------
+
+--- Results from Script: CNN9 cross validation with 2 harmonics ---
+Eval Accuracy: 91.27%
+Information Transfer Rate (ITR): 33.25 bits/minute
+Eval loss:0.46
+----------------------------------------
+
+--- Results from Script: CNN9 cross validation with 1 harmonics ---
+Eval Accuracy: 81.03%
+Information Transfer Rate (ITR): 27.14 bits/minute
+Eval loss:0.77
+----------------------------------------

@@ -149,7 +149,7 @@ print(f"Accuracy: {eval_acc:.2f}, Loss: {eval_loss:.2f}, ITR: {eval_itr:.2f} bit
 # Write metrics to a text file (append mode)
 output_file = "new_model_metrics.txt"
 with open(output_file, "a") as f:
-    f.write(f"\n--- Results from Script: {'CNN9 cross validation'} ---\n")
+    f.write(f"\n--- Results from Script: {'CNN9 cross validation with 3 harmonics'} ---\n")
     f.write(f"Eval Accuracy: {eval_acc * 100:.2f}%\n")
     f.write(f"Information Transfer Rate (ITR): {eval_itr:.2f} bits/minute\n")
     #f.write(f"Training Time: {training_time:.2f} seconds\n")
@@ -178,4 +178,3 @@ plt.ylabel('Loss')
 plt.legend()
 plt.grid(True)
 plt.show()
- 
