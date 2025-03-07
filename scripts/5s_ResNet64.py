@@ -13,10 +13,6 @@ from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.regularizers import l2
 
-# Selected electrodes: Pz, PO5, PO3, POz, PO4, PO6, O1, Oz, O2
-selected_electrodes = [48, 54, 55, 56, 57, 58, 61, 62, 63]  # 1-based indices from the electrode placement file
-selected_indices = [i - 1 for i in selected_electrodes]  # Convert to 0-based indices
-
 # Preprocessing function
 def preprocess_eeg(eeg_data, sampling_rate):
     nyquist = sampling_rate / 2
@@ -26,7 +22,7 @@ def preprocess_eeg(eeg_data, sampling_rate):
     normalized_eeg = (filtered_eeg - np.mean(filtered_eeg, axis=1, keepdims=True)) / np.std(filtered_eeg, axis=1, keepdims=True)
     return normalized_eeg
 
-def extract_features(eeg_data, sampling_rate, num_harmonics=2):
+def extract_features(eeg_data, sampling_rate, num_harmonics=3):
     fft_data = np.abs(np.fft.rfft(eeg_data, axis=1))
     freqs = np.fft.rfftfreq(eeg_data.shape[1], d=1 / sampling_rate)
     features = []
@@ -35,6 +31,20 @@ def extract_features(eeg_data, sampling_rate, num_harmonics=2):
             idx = np.argmin(np.abs(freqs - (freq * h)))
             features.append(fft_data[:, idx])
     return np.array(features).T
+
+def residual_block(x, filters, kernel_size=(3, 3), strides=(1, 1)):
+    shortcut = x
+    if x.shape[-1] != filters:
+        shortcut = Conv2D(filters, (1, 1), strides=strides, padding="same", kernel_regularizer=l2(0.001))(x)
+        shortcut = BatchNormalization()(shortcut)
+    x = Conv2D(filters, kernel_size, strides=strides, padding="same", kernel_regularizer=l2(0.001))(x)
+    x = BatchNormalization()(x)
+    x = Activation("elu")(x)
+    x = Conv2D(filters, kernel_size, strides=(1, 1), padding="same", kernel_regularizer=l2(0.001))(x)
+    x = BatchNormalization()(x)
+    x = Add()([shortcut, x])
+    x = Activation("elu")(x)
+    return x
 
 def calculate_itr(T, N, P):
     if P == 0 or P == 1:
@@ -57,11 +67,10 @@ for mat_file in os.listdir(data_dir):
         print(f"Processing file: {mat_file}")
         mat_contents = sio.loadmat(os.path.join(data_dir, mat_file))
         eeg_data = mat_contents['data']
-        # Select only the 9 desired electrodes
-        eeg_data = eeg_data[selected_indices, :, :, :]
         for block_idx in range(eeg_data.shape[3]):
             for trial_idx in range(40):
-                raw_trial = eeg_data[:, :, trial_idx, block_idx]
+                # Extract only the middle 5 seconds (remove first & last 0.5s)
+                raw_trial = eeg_data[:, 125:1375, trial_idx, block_idx]
                 preprocessed_trial = preprocess_eeg(raw_trial, sampling_rate)
                 features = extract_features(preprocessed_trial, sampling_rate)
                 X.append(features)
@@ -90,13 +99,17 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(X_train)):
     x = Conv2D(16, (3, 3), padding="same", activation="elu", kernel_regularizer=l2(0.001))(inputs)
     x = BatchNormalization()(x)
     x = Activation("elu")(x)
-    x = MaxPooling2D((2, 2))(x)
     x = Dropout(0.1)(x)
     x = Conv2D(32, (3, 3), padding="same", activation="elu", kernel_regularizer=l2(0.001))(x)
     x = BatchNormalization()(x)
     x = Activation("elu")(x)
     x = MaxPooling2D((2, 2))(x)
     x = Dropout(0.1)(x)
+    x = residual_block(x, filters=16)
+    x = residual_block(x, filters=16)
+    x = residual_block(x, filters=32)
+    x = residual_block(x, filters=32)
+    x = MaxPooling2D((2, 2))(x)
     x = Flatten()(x)
     x = Dense(128, activation="elu", kernel_regularizer=l2(0.001))(x)
     x = BatchNormalization()(x)
@@ -147,9 +160,9 @@ print(f"\n--- Evaluation on Hold-Out Set ---")
 print(f"Accuracy: {eval_acc:.2f}, Loss: {eval_loss:.2f}, ITR: {eval_itr:.2f} bits/minute")
 
 # Write metrics to a text file (append mode)
-output_file = "new_model_metrics.txt"
+output_file = "5s_model_metrics.txt"
 with open(output_file, "a") as f:
-    f.write(f"\n--- Results from Script: {'CNN9 cross validation with 2 harmonics'} ---\n")
+    f.write(f"\n--- Results from Script: {'5s ResNet64 cross validation'} ---\n")
     f.write(f"Eval Accuracy: {eval_acc * 100:.2f}%\n")
     f.write(f"Information Transfer Rate (ITR): {eval_itr:.2f} bits/minute\n")
     #f.write(f"Training Time: {training_time:.2f} seconds\n")

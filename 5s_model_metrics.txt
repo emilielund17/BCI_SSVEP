@@ -1,0 +1,24 @@
+
+--- Results from Script: 5s CNN9 cross validation ---
+Eval Accuracy: 95.16%
+Information Transfer Rate (ITR): 35.90 bits/minute
+Eval loss:0.33
+----------------------------------------
+
+--- Results from Script: 5s ResNet9 cross validation ---
+Eval Accuracy: 97.22%
+Information Transfer Rate (ITR): 37.44 bits/minute
+Eval loss:0.43
+----------------------------------------
+
+--- Results from Script: 5s CNN64 cross validation ---
+Eval Accuracy: 90.95%
+Information Transfer Rate (ITR): 33.04 bits/minute
+Eval loss:0.48
+----------------------------------------
+
+--- Results from Script: 5s ResNet64 cross validation ---
+Eval Accuracy: 96.11%
+Information Transfer Rate (ITR): 36.59 bits/minute
+Eval loss:0.41
+----------------------------------------

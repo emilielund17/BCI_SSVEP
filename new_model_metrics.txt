@@ -139,8 +139,52 @@ Information Transfer Rate (ITR): 33.25 bits/minute
 Eval loss:0.46
 ----------------------------------------
 
---- Results from Script: CNN9 cross validation with 1 harmonics ---
-Eval Accuracy: 81.03%
-Information Transfer Rate (ITR): 27.14 bits/minute
-Eval loss:0.77
+
+--- Results from Script: ResNet9 cross validation with 4 harmonics ---
+Eval Accuracy: 95.71%
+Information Transfer Rate (ITR): 36.30 bits/minute
+Eval loss:0.49
 ----------------------------------------
+
+--- Results from Script: ResNet9 cross validation with 5 harmonics ---
+Eval Accuracy: 95.00%
+Information Transfer Rate (ITR): 35.78 bits/minute
+Eval loss:0.50
+----------------------------------------
+
+--- Results from Script: ResNet9 cross validation with 2 harmonics ---
+Eval Accuracy: 92.70%
+Information Transfer Rate (ITR): 34.19 bits/minute
+Eval loss:0.56
+----------------------------------------
+
+--- Results from Script: ResNet9 cross validation with 1 harmonics ---
+Eval Accuracy: 83.10%
+Information Transfer Rate (ITR): 28.30 bits/minute
+Eval loss:0.82
+----------------------------------------
+
+--- Results from Script: ResNet9 cross validation with 3 harmonics ---
+Eval Accuracy: 94.44%
+Information Transfer Rate (ITR): 35.39 bits/minute
+Eval loss:0.53
+----------------------------------------
+
+--- Results from Script: ResNet9 cross validation with 4 harmonics ---
+Eval Accuracy: 94.84%
+Information Transfer Rate (ITR): 35.67 bits/minute
+Eval loss:0.50
+----------------------------------------
+
+--- Results from Script: CNN9 cross validation with 1 harmonics ---
+Eval Accuracy: 79.52%
+Information Transfer Rate (ITR): 26.31 bits/minute
+Eval loss:0.78
+----------------------------------------
+
+--- Results from Script: CNN9 cross validation with 2 harmonics ---
+Eval Accuracy: 90.56%
+Information Transfer Rate (ITR): 32.79 bits/minute
+Eval loss:0.45
+----------------------------------------
+

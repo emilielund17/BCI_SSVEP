@@ -3,7 +3,6 @@ import numpy as np
 import scipy.io as sio
 import scipy.signal as signal
 import json
-import time
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split, KFold
 from tensorflow.keras.models import Model
@@ -26,7 +25,7 @@ def preprocess_eeg(eeg_data, sampling_rate):
     normalized_eeg = (filtered_eeg - np.mean(filtered_eeg, axis=1, keepdims=True)) / np.std(filtered_eeg, axis=1, keepdims=True)
     return normalized_eeg
 
-def extract_features(eeg_data, sampling_rate, num_harmonics=2):
+def extract_features(eeg_data, sampling_rate, num_harmonics=3):
     fft_data = np.abs(np.fft.rfft(eeg_data, axis=1))
     freqs = np.fft.rfftfreq(eeg_data.shape[1], d=1 / sampling_rate)
     features = []
@@ -35,6 +34,20 @@ def extract_features(eeg_data, sampling_rate, num_harmonics=2):
             idx = np.argmin(np.abs(freqs - (freq * h)))
             features.append(fft_data[:, idx])
     return np.array(features).T
+
+def residual_block(x, filters, kernel_size=(3, 3), strides=(1, 1)):
+    shortcut = x
+    if x.shape[-1] != filters:
+        shortcut = Conv2D(filters, (1, 1), strides=strides, padding="same", kernel_regularizer=l2(0.001))(x)
+        shortcut = BatchNormalization()(shortcut)
+    x = Conv2D(filters, kernel_size, strides=strides, padding="same", kernel_regularizer=l2(0.001))(x)
+    x = BatchNormalization()(x)
+    x = Activation("elu")(x)
+    x = Conv2D(filters, kernel_size, strides=(1, 1), padding="same", kernel_regularizer=l2(0.001))(x)
+    x = BatchNormalization()(x)
+    x = Add()([shortcut, x])
+    x = Activation("elu")(x)
+    return x
 
 def calculate_itr(T, N, P):
     if P == 0 or P == 1:
@@ -61,7 +74,8 @@ for mat_file in os.listdir(data_dir):
         eeg_data = eeg_data[selected_indices, :, :, :]
         for block_idx in range(eeg_data.shape[3]):
             for trial_idx in range(40):
-                raw_trial = eeg_data[:, :, trial_idx, block_idx]
+                # Extract only the middle 5 seconds (remove first & last 0.5s)
+                raw_trial = eeg_data[:, 125:1375, trial_idx, block_idx]
                 preprocessed_trial = preprocess_eeg(raw_trial, sampling_rate)
                 features = extract_features(preprocessed_trial, sampling_rate)
                 X.append(features)
@@ -97,6 +111,11 @@ for fold, (train_idx, test_idx) in enumerate(kf.split(X_train)):
     x = Activation("elu")(x)
     x = MaxPooling2D((2, 2))(x)
     x = Dropout(0.1)(x)
+    x = residual_block(x, filters=16)
+    x = residual_block(x, filters=16)
+    x = residual_block(x, filters=32)
+    x = residual_block(x, filters=32)
+    x = MaxPooling2D((2, 2))(x)
     x = Flatten()(x)
     x = Dense(128, activation="elu", kernel_regularizer=l2(0.001))(x)
     x = BatchNormalization()(x)
@@ -147,9 +166,9 @@ print(f"\n--- Evaluation on Hold-Out Set ---")
 print(f"Accuracy: {eval_acc:.2f}, Loss: {eval_loss:.2f}, ITR: {eval_itr:.2f} bits/minute")
 
 # Write metrics to a text file (append mode)
-output_file = "new_model_metrics.txt"
+output_file = "5s_model_metrics.txt"
 with open(output_file, "a") as f:
-    f.write(f"\n--- Results from Script: {'CNN9 cross validation with 2 harmonics'} ---\n")
+    f.write(f"\n--- Results from Script: {'5s ResNet9 cross validation'} ---\n")
     f.write(f"Eval Accuracy: {eval_acc * 100:.2f}%\n")
     f.write(f"Information Transfer Rate (ITR): {eval_itr:.2f} bits/minute\n")
     #f.write(f"Training Time: {training_time:.2f} seconds\n")
