@@ -17,6 +17,10 @@ from tensorflow.keras.regularizers import l2
 selected_electrodes = [48, 54, 55, 56, 57, 58, 61, 62, 63]  # 1-based indices from the electrode placement file
 selected_indices = [i - 1 for i in selected_electrodes]  # Convert to 0-based indices
 
+# Sliding window parameters
+window_size = 500  # 1s window (250 Hz sampling rate)
+step_size = 125  # 0.5s overlap (adjustable)
+
 # Preprocessing function
 def preprocess_eeg(eeg_data, sampling_rate):
     nyquist = sampling_rate / 2
@@ -64,9 +68,13 @@ for mat_file in os.listdir(data_dir):
                 # Extract only the middle 5 seconds (remove first & last 0.5s)
                 raw_trial = eeg_data[:, 125:1375, trial_idx, block_idx]
                 preprocessed_trial = preprocess_eeg(raw_trial, sampling_rate)
-                features = extract_features(preprocessed_trial, sampling_rate)
-                X.append(features)
-                y.append(trial_idx // 6)
+                
+                # **Sliding window processing**
+                for start in range(0, raw_trial.shape[1] - window_size + 1, step_size):
+                    window_segment = preprocessed_trial[:, start:start + window_size]  # 1s segment
+                    features = extract_features(window_segment, sampling_rate)
+                    X.append(features)
+                    y.append(trial_idx // 6)
 
 X = np.array(X)
 X = X[..., np.newaxis]
@@ -143,39 +151,8 @@ print(f"Mean ITR: {mean_itr:.2f} bits/minute")
 
 # Evaluate the best model on hold-out validation set
 eval_loss, eval_acc = best_model.evaluate(X_eval, y_eval)
-eval_itr = calculate_itr(8, len(frequencies), eval_acc)
+eval_itr = calculate_itr(1, len(frequencies), eval_acc)  # Update T for 1s window
 print(f"\n--- Evaluation on Hold-Out Set ---")
 print(f"Accuracy: {eval_acc:.2f}, Loss: {eval_loss:.2f}, ITR: {eval_itr:.2f} bits/minute")
 
-# Write metrics to a text file (append mode)
-output_file = "5s_model_metrics.txt"
-with open(output_file, "a") as f:
-    f.write(f"\n--- Results from Script: {'5s CNN9 cross validation'} ---\n")
-    f.write(f"Eval Accuracy: {eval_acc * 100:.2f}%\n")
-    f.write(f"Information Transfer Rate (ITR): {eval_itr:.2f} bits/minute\n")
-    #f.write(f"Training Time: {training_time:.2f} seconds\n")
-    f.write(f"Eval loss:{eval_loss:.2f}\n")
-    f.write("-" * 40 + "\n")
-
-print(f"Metrics appended to {output_file}")
-
-# Plot accuracy and loss curves for the best model
-plt.figure(figsize=(12, 6))
-plt.plot(best_history.history['accuracy'], label='Training Accuracy')
-plt.plot(best_history.history['val_accuracy'], label='Validation Accuracy')
-plt.title('CNN9 Best Model Accuracy')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
-plt.legend(["Training Accuracy", "Validation Accuracy"]prop={"size":15},loc="bottom right")
-plt.grid(True)
-plt.show()
-
-plt.figure(figsize=(12, 6))
-plt.plot(best_history.history['loss'], label='Training Loss')
-plt.plot(best_history.history['val_loss'], label='Validation Loss')
-plt.title('CNN9 Best Model Loss')
-plt.xlabel('Epoch')
-plt.ylabel('Loss')
-plt.legend()
-plt.grid(True)
-plt.show()
+print("Sliding window model training complete! 🚀")

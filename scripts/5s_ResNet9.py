@@ -89,7 +89,7 @@ y = to_categorical(y, num_classes=len(frequencies))
 X_train, X_eval, y_train, y_eval = train_test_split(X, y, test_size=0.15, random_state=42)
 
 # KFold cross-validation
-kf = KFold(n_splits=5, shuffle=True, random_state=42)
+kf = KFold(n_splits=2, shuffle=True, random_state=42)
 fold_accuracies, fold_losses, fold_itrs = [], [], []
 best_model = None
 best_val_accuracy = 0
