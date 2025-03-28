@@ -1,6 +1,0 @@
-
---- Results from Script: 2s ResNet9 cross validation ---
-Eval Accuracy: 68.25%
-Information Transfer Rate (ITR): 82.27 bits/minute
-Eval loss:1.27
-----------------------------------------

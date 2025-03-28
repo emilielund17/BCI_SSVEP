@@ -28,3 +28,15 @@ Eval Accuracy: 95.48%
 Information Transfer Rate (ITR): 36.13 bits/minute
 Eval loss:0.32
 ----------------------------------------
+
+--- Results from Script: 5s CNN9 cross validation ---
+Eval Accuracy: 95.24%
+Information Transfer Rate (ITR): 35.96 bits/minute
+Eval loss:0.33
+----------------------------------------
+
+--- Results from Script: 5s ResNet9 cross validation ---
+Eval Accuracy: 96.90%
+Information Transfer Rate (ITR): 37.19 bits/minute
+Eval loss:0.43
+----------------------------------------

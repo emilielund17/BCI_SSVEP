@@ -89,7 +89,7 @@ y = to_categorical(y, num_classes=len(frequencies))
 X_train, X_eval, y_train, y_eval = train_test_split(X, y, test_size=0.15, random_state=42)
 
 # KFold cross-validation
-kf = KFold(n_splits=2, shuffle=True, random_state=42)
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
 fold_accuracies, fold_losses, fold_itrs = [], [], []
 best_model = None
 best_val_accuracy = 0
@@ -181,9 +181,11 @@ print(f"Metrics appended to {output_file}")
 plt.figure(figsize=(12, 6))
 plt.plot(best_history.history['accuracy'], label='Training Accuracy')
 plt.plot(best_history.history['val_accuracy'], label='Validation Accuracy')
-plt.title('Best Model Accuracy')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
+plt.title('ResNet9 Best Model Accuracy',fontsize=18)
+plt.xlabel('Epoch', fontsize=16)
+plt.ylabel('Accuracy', fontsize=16)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
 plt.legend()
 plt.grid(True)
 plt.show()
