@@ -9,10 +9,12 @@ This repository contains scripts for classifying SSVEP signals using CNN and Res
 - Performance Metrics: Classification accuracy and Information Transfer Rate (ITR).
 
 ## **Scripts**
-1. **CNN64.py**: CNN with all 64 EEG electrodes.
-2. **CNN9.py**: CNN with 9 task-relevant electrodes.
-3. **ResNet64.py**: ResNet with all 64 electrodes.
-4. **ResNet9.py**: ResNet with 9 electrodes, achieving the highest accuracy (93.25%) and ITR.
+1. **5s_CNN64.py**: CNN with all 64 EEG electrodes.
+2. **5s_CNN9.py**: CNN with 9 task-relevant electrodes.
+3. **5s_ResNet64.py**: ResNet with all 64 electrodes.
+4. **5s_ResNet9.py**: ResNet with 9 electrodes.
+
+Similar scripts exist utlizing six-seconds data lenght.
 
 ## **Usage**
 1. Clone the repository:
