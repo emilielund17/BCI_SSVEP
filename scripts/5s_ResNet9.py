@@ -11,6 +11,8 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.regularizers import l2
+import time
+
 
 # Selected electrodes: Pz, PO5, PO3, POz, PO4, PO6, O1, Oz, O2
 selected_electrodes = [48, 54, 55, 56, 57, 58, 61, 62, 63]  # 1-based indices from the electrode placement file
@@ -160,10 +162,16 @@ print(f"Mean Loss: {mean_loss:.2f}")
 print(f"Mean ITR: {mean_itr:.2f} bits/minute")
 
 # Evaluate the best model on hold-out validation set
+start_time = time.time()
 eval_loss, eval_acc = best_model.evaluate(X_eval, y_eval)
+evaluation_time = time.time() - start_time
 eval_itr = calculate_itr(8, len(frequencies), eval_acc)
+# Calculate the evaluation time per single trial/sample
+time_per_sample = evaluation_time / X_eval.shape[0]
 print(f"\n--- Evaluation on Hold-Out Set ---")
 print(f"Accuracy: {eval_acc:.2f}, Loss: {eval_loss:.2f}, ITR: {eval_itr:.2f} bits/minute")
+print(f"Evaluation Time: {evaluation_time:.3f} seconds")
+print(f"Evaluation Time per single trial: {time_per_sample:.4f} seconds")
 
 # Write metrics to a text file (append mode)
 output_file = "5s_model_metrics.txt"
@@ -171,7 +179,8 @@ with open(output_file, "a") as f:
     f.write(f"\n--- Results from Script: {'5s ResNet9 cross validation'} ---\n")
     f.write(f"Eval Accuracy: {eval_acc * 100:.2f}%\n")
     f.write(f"Information Transfer Rate (ITR): {eval_itr:.2f} bits/minute\n")
-    #f.write(f"Training Time: {training_time:.2f} seconds\n")
+    f.write(f"Evaluation Time: {evaluation_time:.3f} seconds\n")
+    f.write(f"Evaluation Time per single trial: {time_per_sample:.5f} seconds\n")
     f.write(f"Eval loss:{eval_loss:.2f}\n")
     f.write("-" * 40 + "\n")
 
